@@ -282,6 +282,7 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return 0
+
             if event.type == pg.KEYDOWN: #下キーを押した場合
                 if event.type == pg.KEYDOWN and event.key == pg.K_SPACE: 
                     beams.add(Beam(bird))
@@ -289,6 +290,11 @@ def main():
                     gravitys.add(Gravity(400)) #発動時間(400フレーム)
                     score.value -= 200
                     bird.change_img(6, screen)      
+
+            if  event.type == pg.KEYDOWN and event.key == pg.K_LSHIFT:
+                bird.speed = 20
+     
+
         screen.blit(bg_img, [0, 0])
 
         if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
