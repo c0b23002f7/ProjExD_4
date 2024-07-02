@@ -286,7 +286,7 @@ def main():
                 if score.value >= 200 and event.key == pg.K_RETURN: #スコアが200以上かつリターンキーが押されていた場合
                     gravitys.add(Gravity(400)) #発動時間(400フレーム)
                     score.value -= 200
-            
+                    bird.change_img(6, screen)      
         screen.blit(bg_img, [0, 0])
 
         if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
@@ -318,10 +318,10 @@ def main():
         for gravity in gravitys:
             for bomb in pg.sprite.spritecollide(gravity, bombs, True): #爆弾と重力衝突
                 exps.add(Explosion(bomb, 50)) #爆発エフェクト
-                score.value += 1
+                score.value += 1 #1点アップ
             for emy in pg.sprite.spritecollide(gravity, emys, True): #敵と重力衝突
                 exps.add(Explosion(emy, 50)) #爆発エフェクト
-                score.value += 10
+                score.value += 10 #10点アップ
 
 
         bird.update(key_lst, screen)
