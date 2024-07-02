@@ -267,6 +267,22 @@ class Shield(pg.sprite.Sprite):
             Shield.active_shield = False
         
 
+class Gravity(pg.sprite.Sprite):
+    """
+    画面を覆う重力を発生させる
+    """
+    def __init__(self, life: int):
+        super().__init__()
+        self.image = pg.Surface((WIDTH, HEIGHT))
+        pg.draw.rect(self.image, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
+        self.rect = self.image.get_rect()
+        self.image.set_alpha(128)
+        self.life = life
+
+    def update(self):
+        self.life -= 1
+        if self.life < 0:
+            self.kill()
 
 
 def main():
@@ -281,6 +297,7 @@ def main():
     exps = pg.sprite.Group()
     emys = pg.sprite.Group()
     shields = pg.sprite.Group()
+    gravitys = pg.sprite.Group()
     tmr = 0
     clock = pg.time.Clock()
 
@@ -290,8 +307,14 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return 0
-            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                beams.add(Beam(bird))
+            if event.type == pg.KEYDOWN:
+                if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                    beams.add(Beam(bird))
+                if score.value >= 20 and event.key == pg.K_RETURN:
+                    gravitys.add(Gravity(400))
+                    score.value -= 20
+                    bird.change_img(6, screen)
+            
             if event.type == pg.KEYDOWN and event.key == pg.K_LSHIFT:
                 bird.speed = 20
             if event.type == pg.KEYUP and event.key == pg.K_LSHIFT:
@@ -332,6 +355,16 @@ def main():
             pg.display.update()
             time.sleep(2)
             return
+        
+        gravitys.update()
+        gravitys.draw(screen)
+        for gravity in gravitys:
+            for bomb in pg.sprite.spritecollide(gravity, bombs, True):
+                exps.add(Explosion(bomb, 50))
+                score.value += 1
+            for emy in pg.sprite.spritecollide(gravity, emys, True):
+                exps.add(Explosion(emy, 50))
+                score.value += 10 
 
         bird.update(key_lst, screen)
         beams.update()
