@@ -141,14 +141,18 @@ class Beam(pg.sprite.Sprite):
     """
     ビームに関するクラス
     """
-    def __init__(self, bird: Bird):
+    def __init__(self, bird: Bird, angle0: float = 0):
         """
         ビーム画像Surfaceを生成する
         引数 bird：ビームを放つこうかとん
         """
         super().__init__()
         self.vx, self.vy = bird.dire
+        
         angle = math.degrees(math.atan2(-self.vy, self.vx))
+        #追加機能６angleの設定
+        angle = math.degrees(math.atan2(-self.vy,self.vx))+angle0
+
         self.image = pg.transform.rotozoom(pg.image.load(f"fig/beam.png"), angle, 2.0)
         self.vx = math.cos(math.radians(angle))
         self.vy = -math.sin(math.radians(angle))
@@ -156,6 +160,8 @@ class Beam(pg.sprite.Sprite):
         self.rect.centery = bird.rect.centery+bird.rect.height*self.vy
         self.rect.centerx = bird.rect.centerx+bird.rect.width*self.vx
         self.speed = 10
+        
+        
 
     def update(self):
         """
@@ -241,23 +247,27 @@ class Score:
         self.image = self.font.render(f"Score: {self.value}", 0, self.color)
         screen.blit(self.image, self.rect)
 
-class Gravity(pg.sprite.Sprite):
+class NeoBeam:
     """
-    画面を覆う重力場を発生させる
-    (演習課題2)
+    弾幕に関するクラス＃追加機能６
     """
-    def __init__(self, life: int):
-        super().__init__()
-        self.image = pg.Surface((WIDTH, HEIGHT)) #空のSurfaceインスタンスの生成
-        pg.draw.rect(self.image, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
-        self.rect = self.image.get_rect()
-        self.image.set_alpha(128) #透明度の設定
-        self.life = life
+    def __init__(self, bird:Bird, num : int):
+        """
+        引数bird：こうかとん
+        引数num：ビームの数
+        """
+        self.bird = bird
+        self.num = num
 
-    def update(self):
-        self.life -= 1
-        if self.life < 0:
-            self.kill()
+    def gen_beams(self):
+        """
+        beamインスタンスの生成
+        """
+        beams = []
+        for ang in range(-50, 51,100//(self.num-1)):
+            beam = Beam(self.bird, ang)
+            beams.append(beam)
+        return beams
 
 
 def main():
@@ -282,19 +292,12 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return 0
-
-            if event.type == pg.KEYDOWN: #下キーを押した場合
-                if event.type == pg.KEYDOWN and event.key == pg.K_SPACE: 
-                    beams.add(Beam(bird))
-                if score.value >= 200 and event.key == pg.K_RETURN: #スコアが200以上かつリターンキーが押されていた場合
-                    gravitys.add(Gravity(400)) #発動時間(400フレーム)
-                    score.value -= 200
-                    bird.change_img(6, screen)      
-
-            if  event.type == pg.KEYDOWN and event.key == pg.K_LSHIFT:
-                bird.speed = 20
-     
-
+            
+            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE and key_lst[pg.K_LSHIFT]: #追加機能６条件キーが推された時
+                beams.add(NeoBeam(bird, 5).gen_beams())
+            elif event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                beams.add(Beam(bird))
+            
         screen.blit(bg_img, [0, 0])
 
         if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
