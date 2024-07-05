@@ -244,7 +244,7 @@ class Score:
     def __init__(self):
         self.font = pg.font.Font(None, 50)
         self.color = (0, 0, 255)
-        self.value = 0
+        self.value = 1000
         self.image = self.font.render(f"Score: {self.value}", 0, self.color)
         self.rect = self.image.get_rect()
         self.rect.center = 100, HEIGHT-50
@@ -432,8 +432,8 @@ def main():
         for bomb in pg.sprite.groupcollide(bombs, beams, True, True).keys():
             exps.add(Explosion(bomb, 50))  # 爆発エフェクト
             score.value += 1  # 1点アップ
-        for shield2 in pg.sprite.groupcollide(bombs, shields, True, True).keys():
-            exps.add(Explosion(shield2, 50))
+        for bomb in pg.sprite.groupcollide(bombs, shields, True, True).keys():
+            exps.add(Explosion(bomb, 50))
 
         for emp in emps:
             emp.update()
