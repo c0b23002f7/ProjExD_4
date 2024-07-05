@@ -151,7 +151,7 @@ class Beam(pg.sprite.Sprite):
     """
     ビームに関するクラス
     """
-    def __init__(self, bird: Bird):
+    def __init__(self, bird: Bird,angle0: float =0):
         """
         ビーム画像Surfaceを生成する
         引数 bird：ビームを放つこうかとん
@@ -159,6 +159,8 @@ class Beam(pg.sprite.Sprite):
         super().__init__()
         self.vx, self.vy = bird.dire
         angle = math.degrees(math.atan2(-self.vy, self.vx))
+        #追加機能６
+        angle = math.degrees(math.atan2(-self.vy, self.vx))+angle0
         self.image = pg.transform.rotozoom(pg.image.load(f"fig/beam.png"), angle, 2.0)
         self.vx = math.cos(math.radians(angle))
         self.vy = -math.sin(math.radians(angle))
@@ -242,7 +244,7 @@ class Score:
     def __init__(self):
         self.font = pg.font.Font(None, 50)
         self.color = (0, 0, 255)
-        self.value = 10000
+        self.value = 0
         self.image = self.font.render(f"Score: {self.value}", 0, self.color)
         self.rect = self.image.get_rect()
         self.rect.center = 100, HEIGHT-50
@@ -333,7 +335,27 @@ class EMP(pg.sprite.Sprite):  # EMP発生
         else:
             self.kill()  # EMPの終了
 
-
+class NeoBeam:
+    """
+    爆弾の関するクラス
+    """
+    def __init__(self, bird:Bird, num : int):
+        """
+        引数bird：こいかとん
+        引数num：ビームの数
+        """
+        self.bird = bird
+        self.num = num
+    def gen_beams(self):
+        """
+        beamインスタンスの生成
+        """
+        beams = []
+        for ang in range(-50, 51,100//(self.num-1)):
+            beam = Beam(self.bird,ang)
+            beams.append(beam)
+        return beams
+    
 def main():
     pg.display.set_caption("真！こうかとん無双")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -357,6 +379,11 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return 0
+            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE and key_lst[pg.K_LSHIFT]:#追加機能６条件キーがおされたとき
+                beams.add(NeoBeam(bird, 5).gen_beams())
+            elif event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                beams.add(Beam(bird))
+
             if event.type == pg.KEYDOWN:
                 if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                     beams.add(Beam(bird))
